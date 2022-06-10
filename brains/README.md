@@ -1,0 +1,1 @@
+open `index.html` in the browser and start training the network.
