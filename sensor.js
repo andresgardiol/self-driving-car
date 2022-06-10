@@ -12,13 +12,13 @@ class Sensor {
     update(roadBorders, traffic) {
         this.#castRays();
         this.readings = [];
-
         for (let i = 0; i < this.rays.length; i++) {
             this.readings.push(
                 this.#getReading(
-                    this.rays[i], 
+                    this.rays[i],
                     roadBorders,
-                    traffic)
+                    traffic
+                )
             );
         }
     }
@@ -32,7 +32,7 @@ class Sensor {
                 ray[1],
                 roadBorders[i][0],
                 roadBorders[i][1]
-            )
+            );
             if (touch) {
                 touches.push(touch);
             }
@@ -56,9 +56,9 @@ class Sensor {
         if (touches.length == 0) {
             return null;
         } else {
-            const offsets = touches.map(touch => touch.offset);
-            const minOffest = Math.min(...offsets);
-            return touches.find(touch => touch.offset == minOffest);
+            const offsets = touches.map(e => e.offset);
+            const minOffset = Math.min(...offsets);
+            return touches.find(e => e.offset == minOffset);
         }
     }
 
@@ -83,7 +83,7 @@ class Sensor {
     }
 
     draw(ctx) {
-        for (let i = 0; i < this.rays.length; i++) {
+        for (let i = 0; i < this.rayCount; i++) {
             let end = this.rays[i][1];
             if (this.readings[i]) {
                 end = this.readings[i];
@@ -100,7 +100,6 @@ class Sensor {
                 end.x,
                 end.y
             );
-
             ctx.stroke();
 
             ctx.beginPath();
@@ -114,9 +113,7 @@ class Sensor {
                 end.x,
                 end.y
             );
-
             ctx.stroke();
         }
     }
-
 }
