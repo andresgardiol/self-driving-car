@@ -6,10 +6,12 @@ networkCanvas.width = 300;
 const carCtx = carCanvas.getContext("2d");
 const networkCtx = networkCanvas.getContext("2d");
 
-const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, 4);
+const LANE_COUNT = 4;
+const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, LANE_COUNT);
 
-const N = 800;
-const MUTATION_RATE = 0.014;
+const N = 1000;
+const MUTATION_RATE = 0.33;
+const CAR_MAX_SPEED = 7;
 const cars = generateCars(N);
 let bestCar = cars[0];
 if (localStorage.getItem("bestBrain")) {
@@ -22,7 +24,7 @@ if (localStorage.getItem("bestBrain")) {
     }
 }
 
-const traffic = generateTraffic(100);
+const traffic = generateTraffic(70);
 
 animate();
 
@@ -38,7 +40,7 @@ function discard() {
 function generateCars(N) {
     const cars = [];
     for (let i = 1; i <= N; i++) {
-        cars.push(new Car(road.getLaneCenter(1), 100, 30, 50, "AI"));
+        cars.push(new Car(road.getLaneCenter(1), 100, 30, 50, "AI", CAR_MAX_SPEED));
     }
     return cars;
 }
@@ -81,20 +83,24 @@ function animate(time) {
 
 function generateTraffic(N) {
     const traffic = [];
-    let distance = -100;
-    let lane = 1;
+    let distanceBetweenEeach = -100;
     let carsQty = 0;
     for (let i = 0; i < N; i++) {
-        carsQty = Math.floor(Math.random() * 3);
-
-        for (let j = 0; j < carsQty; j++) {
-            traffic.push(new Car(road.getLaneCenter(lane + j), distance, 30, 50, "DUMMY", 2));
+        for (let j = 0; j < LANE_COUNT; j++) {
+            let spawnCar = getRandomBetween(0, 1) ? true : false;
+            console.log(spawnCar);
+            if (spawnCar && carsQty < LANE_COUNT - 1) {
+                traffic.push(new Car(road.getLaneCenter(j), distanceBetweenEeach, 30, 50, "DUMMY", 2));
+                carsQty++;
+            }
         }
-
-        distance -= 200;
-        // random integer between 0 and 2
-        lane = Math.floor(Math.random() * 3);
+        distanceBetweenEeach -= 200
+        carsQty = 0;
     }
+    console.log(traffic);
     return traffic;
 }
 
+function getRandomBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}

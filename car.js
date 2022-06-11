@@ -1,4 +1,4 @@
-const TURN_ANGLE = 0.03;
+const TURN_ANGLE = 0.04;
 const FRICTION = 0.05;
 const ACCELERATION = 0.2;
 class Car {
