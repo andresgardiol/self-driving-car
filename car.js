@@ -1,6 +1,6 @@
-const TURN_ANGLE = 0.04;
+const TURN_ANGLE = 0.03;
 const FRICTION = 0.05;
-const ACCELERATION = 0.2;
+const ACCELERATION = 0.1;
 class Car {
 	constructor(x, y, width, height, controlType, maxSpeed = 5) {
 		this.x = x;

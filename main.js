@@ -1,17 +1,18 @@
 const carCanvas = document.getElementById("carCanvas");
-carCanvas.width = 200;
-const networkCanvas = document.getElementById("networkCanvas");
-networkCanvas.width = 300;
+carCanvas.width = 250;
+
+// const networkCanvas = document.getElementById("networkCanvas");
+// networkCanvas.width = 300;
 
 const carCtx = carCanvas.getContext("2d");
-const networkCtx = networkCanvas.getContext("2d");
+// const networkCtx = networkCanvas.getContext("2d");
 
-const LANE_COUNT = 4;
+const LANE_COUNT = 1;
 const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, LANE_COUNT);
 
-const N = 1000;
-const MUTATION_RATE = 0.33;
-const CAR_MAX_SPEED = 7;
+const N = 1;
+const MUTATION_RATE = 0.07;
+const CAR_MAX_SPEED = 2;
 const cars = generateCars(N);
 let bestCar = cars[0];
 if (localStorage.getItem("bestBrain")) {
@@ -24,28 +25,25 @@ if (localStorage.getItem("bestBrain")) {
     }
 }
 
-const traffic = generateTraffic(70);
+const traffic = generateTraffic(3);
 
+function generateTraffic(N) {
+    const traffic = [];
+    traffic.push(new Car(40, 250, 40, 60, "DUMMY", 2));
+    traffic.push(new Car(40, 450, 40, 60, "DUMMY", 2));
+    return traffic;
+}
 animate();
-
-function save() {
-    localStorage.setItem("bestBrain",
-        JSON.stringify(bestCar.brain));
-}
-
-function discard() {
-    localStorage.removeItem("bestBrain");
-}
 
 function generateCars(N) {
     const cars = [];
     for (let i = 1; i <= N; i++) {
-        cars.push(new Car(road.getLaneCenter(1), 100, 30, 50, "AI", CAR_MAX_SPEED));
+        cars.push(new Car(road.getLaneCenter(1), 650, 40, 60, "KEYS", CAR_MAX_SPEED));
     }
     return cars;
 }
 
-function animate(time) {
+function animate() {
     for (let i = 0; i < traffic.length; i++) {
         traffic[i].update(road.borders, []);
     }
@@ -57,11 +55,10 @@ function animate(time) {
             ...cars.map(c => c.y)
         ));
 
-    carCanvas.height = window.innerHeight;
-    networkCanvas.height = window.innerHeight;
+    carCanvas.height = 800;
+    // networkCanvas.height = window.innerHeight;
 
     carCtx.save();
-    carCtx.translate(0, -bestCar.y + carCanvas.height * 0.7);
 
     road.draw(carCtx);
     for (let i = 0; i < traffic.length; i++) {
@@ -76,31 +73,21 @@ function animate(time) {
 
     carCtx.restore();
 
-    networkCtx.lineDashOffset = -time / 50;
-    Visualizer.drawNetwork(networkCtx, bestCar.brain);
+    // networkCtx.lineDashOffset = -time / 50;
+    // Visualizer.drawNetwork(networkCtx, bestCar.brain);
     requestAnimationFrame(animate);
 }
 
-function generateTraffic(N) {
-    const traffic = [];
-    let distanceBetweenEeach = -100;
-    let carsQty = 0;
-    for (let i = 0; i < N; i++) {
-        for (let j = 0; j < LANE_COUNT; j++) {
-            let spawnCar = getRandomBetween(0, 1) ? true : false;
-            console.log(spawnCar);
-            if (spawnCar && carsQty < LANE_COUNT - 1) {
-                traffic.push(new Car(road.getLaneCenter(j), distanceBetweenEeach, 30, 50, "DUMMY", 2));
-                carsQty++;
-            }
-        }
-        distanceBetweenEeach -= 200
-        carsQty = 0;
-    }
-    console.log(traffic);
-    return traffic;
-}
 
 function getRandomBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function save() {
+    localStorage.setItem("bestBrain",
+        JSON.stringify(bestCar.brain));
+}
+
+function discard() {
+    localStorage.removeItem("bestBrain");
 }
