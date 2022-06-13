@@ -2,7 +2,7 @@ const TURN_ANGLE = 0.04;
 const FRICTION = 0.05;
 const ACCELERATION = 0.2;
 class Car {
-	constructor(x, y, width, height, controlType, maxSpeed = 5, color="blue") {
+	constructor(x, y, width, height, controlType, maxSpeed = 5) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -20,13 +20,15 @@ class Car {
 		if (controlType != "DUMMY") {
 			this.sensor = new Sensor(this);
 			this.brain = new NeuralNetwork(
-				[this.sensor.rayCount, 6, 4]
+					[this.sensor.rayCount, 6, 4]
 			);
 		}
 		this.controls = new Controls(controlType);
 
+
 		this.img = new Image();
 		this.img.src="car.png";
+
 	}
 
 	update(roadBorders, traffic) {
@@ -38,7 +40,7 @@ class Car {
 		if (this.sensor) {
 			this.sensor.update(roadBorders, traffic);
 			const offsets = this.sensor.readings.map(
-				s => s == null ? 0 : 1 - s.offset
+					s => s == null ? 0 : 1 - s.offset
 			);
 			const outputs = NeuralNetwork.feedForward(offsets, this.brain);
 
@@ -127,7 +129,7 @@ class Car {
 		this.y -= Math.cos(this.angle) * this.speed;
 	}
 
-	draw(ctx, drawSensor = false) {
+	draw(ctx, color, drawSensor = false) {
 		ctx.save();
 		ctx.translate(this.x, this.y);
 		ctx.rotate(-this.angle);
