@@ -127,7 +127,7 @@ class Car {
 		this.y -= Math.cos(this.angle) * this.speed;
 	}
 
-	draw(ctx, drawSensor = false) {
+	draw(ctx, color, drawSensor = false) {
 		ctx.save();
 		ctx.translate(this.x, this.y);
 		ctx.rotate(-this.angle);
