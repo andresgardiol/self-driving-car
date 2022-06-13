@@ -1,5 +1,5 @@
 const RAY_COUNT = 9;
-const RAY_LENGTH = 200;
+const RAY_LENGTH = 150;
 class Sensor {
     constructor(car) {
         this.car = car;
