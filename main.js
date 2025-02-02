@@ -9,10 +9,10 @@ const networkCtx = networkCanvas.getContext("2d");
 const LANE_COUNT = 4;
 const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, LANE_COUNT);
 
-const N = 600;
-const MUTATION_RATE = 0.14;
-const CAR_MAX_SPEED = 7;
-const cars = generateCars(N);
+const CAR_COUNT = 150;
+const MUTATION_RATE = 0.4;
+const CAR_MAX_SPEED = 6;
+const cars = generateCars(CAR_COUNT);
 let bestCar = cars[0];
 if (localStorage.getItem("bestBrain")) {
     for (let i = 0; i < cars.length; i++) {
@@ -24,16 +24,41 @@ if (localStorage.getItem("bestBrain")) {
     }
 }
 
+if (localStorage.getItem("counter")) {
+    document.getElementById("counter").innerText = localStorage.getItem("counter") || 0;
+}
+
 const traffic = generateTraffic(70);
 
 animate();
 
 function save() {
+    let savedBrain = localStorage.getItem("bestBrain");
+    if (savedBrain) {
+        if (savedBrain === JSON.stringify(bestCar.brain)) {
+            return;
+        }
+        // set a counter for the number of times the best brain has been saved
+        let counter = 1;
+        // check if the counter exists in the local storage
+        if (localStorage.getItem("counter")) {
+            // if it exists, get the value and increment it
+            counter = parseInt(localStorage.getItem("counter")) + 1;
+        }
+        // save the new counter value
+        localStorage.setItem("counter", counter.toString());
+    } else {
+        let counter = 1;
+        localStorage.setItem("counter", counter.toString());
+    }
     localStorage.setItem("bestBrain",
         JSON.stringify(bestCar.brain));
 }
 
 function discard() {
+    // Update counter
+    let counter = 0;
+    localStorage.setItem("counter", counter.toString());
     localStorage.removeItem("bestBrain");
 }
 
@@ -77,7 +102,7 @@ function animate(time) {
     carCtx.restore();
 
     networkCtx.lineDashOffset = -time / 50;
-    Visualizer.drawNetwork(networkCtx, bestCar.brain);
+    //Visualizer.drawNetwork(networkCtx, bestCar.brain);
     requestAnimationFrame(animate);
 }
 
