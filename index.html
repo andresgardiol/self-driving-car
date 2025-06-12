@@ -126,10 +126,16 @@
 					<input type="range" id="roadWidthSlider" min="0.5" max="1" step="0.05" value="0.7">
 					<span id="roadWidthValue">70%</span>
 				</div>
-				<button onclick="applyRoadSettings()" class="btn btn-secondary" style="margin-top: 1rem;">
-					<i class="fas fa-sync-alt"></i>
-					Aplicar Cambios
-				</button>
+				<div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+					<button onclick="applyRoadSettings()" class="btn btn-secondary" style="flex: 1;">
+						<i class="fas fa-sync-alt"></i>
+						Aplicar Cambios
+					</button>
+					<button onclick="resetToDefaultConfig()" class="btn btn-outline" style="flex: 1;" title="Restaurar configuración por defecto">
+						<i class="fas fa-undo"></i>
+						Por Defecto
+					</button>
+				</div>
 			</div>
 
 			<div class="panel-section">
@@ -139,9 +145,12 @@
 					<p><strong>Controles:</strong></p>
 					<ul>
 						<li>💾 Guardar: Almacena el mejor cerebro</li>
-						<li>🗑️ Reiniciar: Borra el progreso</li>
+						<li>🗑️ Reiniciar: Solo borra el progreso de entrenamiento</li>
 						<li>⏸️ Pausar: Pausa la simulación</li>
+						<li>🔄 Aplicar: Aplica cambios de configuración</li>
+						<li>↶ Por Defecto: Restaura configuración inicial</li>
 					</ul>
+					<p><strong>Nota:</strong> La configuración de la simulación se guarda automáticamente y persiste entre sesiones.</p>
 				</div>
 			</div>
 		</aside>

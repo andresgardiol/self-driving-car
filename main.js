@@ -4,16 +4,27 @@ const networkCanvas = document.getElementById("networkCanvas");
 const carCtx = carCanvas.getContext("2d");
 const networkCtx = networkCanvas.getContext("2d");
 
-let LANE_COUNT = 3;
-let CAR_COUNT = 150;
-let TRAFFIC_DENSITY = 0.4;
-let ROAD_WIDTH_FACTOR = 0.7;
+// Configuración por defecto
+const DEFAULT_CONFIG = {
+    LANE_COUNT: 3,
+    CAR_COUNT: 150,
+    TRAFFIC_DENSITY: 0.4,
+    ROAD_WIDTH_FACTOR: 0.7,
+    SIMULATION_SPEED: 1
+};
+
+// Variables de configuración (se cargarán desde localStorage o usarán valores por defecto)
+let LANE_COUNT = DEFAULT_CONFIG.LANE_COUNT;
+let CAR_COUNT = DEFAULT_CONFIG.CAR_COUNT;
+let TRAFFIC_DENSITY = DEFAULT_CONFIG.TRAFFIC_DENSITY;
+let ROAD_WIDTH_FACTOR = DEFAULT_CONFIG.ROAD_WIDTH_FACTOR;
+
 const MUTATION_RATE = 0.4;
 const CAR_MAX_SPEED = 6;
 
 // Variables para la nueva UI
 let isPaused = false;
-let simulationSpeed = 1;
+let simulationSpeed = DEFAULT_CONFIG.SIMULATION_SPEED;
 let showNetwork = false;
 let frameCount = 0;
 let startTime = Date.now();
@@ -22,6 +33,66 @@ let road;
 let cars;
 let bestCar;
 let traffic;
+
+// Funciones para manejar configuración
+function saveSimulationConfig() {
+    const config = {
+        LANE_COUNT,
+        CAR_COUNT,
+        TRAFFIC_DENSITY,
+        ROAD_WIDTH_FACTOR,
+        SIMULATION_SPEED: simulationSpeed
+    };
+    localStorage.setItem("simulationConfig", JSON.stringify(config));
+}
+
+function loadSimulationConfig() {
+    const savedConfig = localStorage.getItem("simulationConfig");
+    if (savedConfig) {
+        const config = JSON.parse(savedConfig);
+        LANE_COUNT = config.LANE_COUNT || DEFAULT_CONFIG.LANE_COUNT;
+        CAR_COUNT = config.CAR_COUNT || DEFAULT_CONFIG.CAR_COUNT;
+        TRAFFIC_DENSITY = config.TRAFFIC_DENSITY || DEFAULT_CONFIG.TRAFFIC_DENSITY;
+        ROAD_WIDTH_FACTOR = config.ROAD_WIDTH_FACTOR || DEFAULT_CONFIG.ROAD_WIDTH_FACTOR;
+        simulationSpeed = config.SIMULATION_SPEED || DEFAULT_CONFIG.SIMULATION_SPEED;
+    }
+}
+
+function resetToDefaultConfig() {
+    LANE_COUNT = DEFAULT_CONFIG.LANE_COUNT;
+    CAR_COUNT = DEFAULT_CONFIG.CAR_COUNT;
+    TRAFFIC_DENSITY = DEFAULT_CONFIG.TRAFFIC_DENSITY;
+    ROAD_WIDTH_FACTOR = DEFAULT_CONFIG.ROAD_WIDTH_FACTOR;
+    simulationSpeed = DEFAULT_CONFIG.SIMULATION_SPEED;
+    
+    // Actualizar los controles de la UI
+    updateConfigurationControls();
+    
+    // Guardar la configuración por defecto
+    saveSimulationConfig();
+    
+    // Aplicar los cambios
+    applyRoadSettings();
+    
+    showNotification("Configuración restaurada a valores por defecto", "info");
+}
+
+function updateConfigurationControls() {
+    document.getElementById("speedSlider").value = simulationSpeed;
+    document.getElementById("speedValue").textContent = simulationSpeed + "x";
+    
+    document.getElementById("carCountSlider").value = CAR_COUNT;
+    document.getElementById("carCountValue").textContent = CAR_COUNT;
+    
+    document.getElementById("laneCountSlider").value = LANE_COUNT;
+    document.getElementById("laneCountValue").textContent = LANE_COUNT;
+    
+    document.getElementById("trafficDensitySlider").value = TRAFFIC_DENSITY;
+    document.getElementById("trafficDensityValue").textContent = Math.round(TRAFFIC_DENSITY * 100) + "%";
+    
+    document.getElementById("roadWidthSlider").value = ROAD_WIDTH_FACTOR;
+    document.getElementById("roadWidthValue").textContent = Math.round(ROAD_WIDTH_FACTOR * 100) + "%";
+}
 
 // Configurar tamaños de canvas
 function resizeCanvases() {
@@ -39,6 +110,9 @@ function resizeCanvases() {
 
 // Inicializar todo
 function initialize() {
+    // Cargar configuración guardada
+    loadSimulationConfig();
+    
     // Configurar canvas
     resizeCanvases();
     window.addEventListener('resize', resizeCanvases);
@@ -69,6 +143,9 @@ function initialize() {
     
     // Inicializar controles de la UI
     initializeUIControls();
+    
+    // Actualizar controles con configuración cargada
+    updateConfigurationControls();
     
     // Comenzar animación
     animate();
@@ -107,15 +184,29 @@ function save() {
 }
 
 function discard() {
-    // Update counter
+    // Solo eliminar el progreso del entrenamiento, NO la configuración
     let counter = 0;
     localStorage.setItem("counter", counter.toString());
     localStorage.removeItem("bestBrain");
     updateGenerationCounter();
-    showNotification("Progreso reiniciado", "warning");
+    showNotification("Progreso de entrenamiento reiniciado (configuración preservada)", "warning");
     
-    // Reiniciar simulación
-    location.reload();
+    // Reiniciar simulación manteniendo la configuración actual
+    reinitializeSimulation();
+}
+
+function reinitializeSimulation() {
+    // Recrear la carretera con configuración actual
+    road = new Road(carCanvas.width / 2, carCanvas.width * ROAD_WIDTH_FACTOR, LANE_COUNT);
+    
+    // Regenerar autos con configuración actual
+    cars = generateCars(CAR_COUNT);
+    bestCar = cars[0];
+    
+    // NO cargar cerebro guardado ya que estamos reiniciando
+    
+    // Regenerar tráfico con configuración actual
+    traffic = generateTraffic(60);
 }
 
 function pauseSimulation() {
@@ -168,6 +259,7 @@ function initializeUIControls() {
     speedSlider.addEventListener("input", (e) => {
         simulationSpeed = parseFloat(e.target.value);
         speedValue.textContent = simulationSpeed + "x";
+        saveSimulationConfig(); // Guardar configuración automáticamente
     });
     
     // Control de número de autos
@@ -177,6 +269,7 @@ function initializeUIControls() {
     carCountSlider.addEventListener("input", (e) => {
         CAR_COUNT = parseInt(e.target.value);
         carCountValue.textContent = e.target.value;
+        saveSimulationConfig(); // Guardar configuración automáticamente
     });
     
     // Control de número de carriles
@@ -186,6 +279,7 @@ function initializeUIControls() {
     laneCountSlider.addEventListener("input", (e) => {
         LANE_COUNT = parseInt(e.target.value);
         laneCountValue.textContent = e.target.value;
+        saveSimulationConfig(); // Guardar configuración automáticamente
     });
     
     // Control de densidad de tráfico
@@ -195,6 +289,7 @@ function initializeUIControls() {
     trafficDensitySlider.addEventListener("input", (e) => {
         TRAFFIC_DENSITY = parseFloat(e.target.value);
         trafficDensityValue.textContent = Math.round(TRAFFIC_DENSITY * 100) + "%";
+        saveSimulationConfig(); // Guardar configuración automáticamente
     });
     
     // Control de ancho de carretera
@@ -204,6 +299,7 @@ function initializeUIControls() {
     roadWidthSlider.addEventListener("input", (e) => {
         ROAD_WIDTH_FACTOR = parseFloat(e.target.value);
         roadWidthValue.textContent = Math.round(ROAD_WIDTH_FACTOR * 100) + "%";
+        saveSimulationConfig(); // Guardar configuración automáticamente
     });
     
     // Toggle de red neuronal
@@ -412,6 +508,9 @@ function getRandomBetween(min, max) {
 }
 
 function applyRoadSettings() {
+    // Guardar configuración antes de aplicar
+    saveSimulationConfig();
+    
     // Recrear la carretera con nuevas configuraciones
     road = new Road(carCanvas.width / 2, carCanvas.width * ROAD_WIDTH_FACTOR, LANE_COUNT);
     
@@ -433,7 +532,7 @@ function applyRoadSettings() {
     traffic = generateTraffic(60);
     
     // Mostrar notificación
-    showNotification("Configuración aplicada correctamente", "success");
+    showNotification("Configuración aplicada y guardada correctamente", "success");
 }
 
 // Agregar estilos para las notificaciones
