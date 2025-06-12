@@ -1,21 +1,153 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 	<meta charset="UTF-8">
-	<title>Self driving car</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Auto Conducido - Simulación IA</title>
 	<link rel="stylesheet" href="style.css">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-	<canvas id="carCanvas"></canvas>
-	<div id="vericalButtons">
-		<button onclick="save()">💾</button>
-		<button onclick="discard()">🗑</button>
-		<div id="counter">
-			<span id="label">Generations: </span>
-			<span id="counterValue">0</span>
+	<!-- Header -->
+	<header class="header">
+		<div class="header-content">
+			<div class="logo">
+				<i class="fas fa-car"></i>
+				<h1>Auto Conducido IA</h1>
+			</div>
+			<div class="header-info">
+				<span class="status-indicator">
+					<i class="fas fa-circle status-dot"></i>
+					Simulación Activa
+				</span>
+			</div>
 		</div>
-	</div>
-	<canvas id="networkCanvas"></canvas>
+	</header>
+
+	<!-- Main Content -->
+	<main class="main-content">
+		<!-- Simulation Canvas -->
+		<div class="canvas-container">
+			<canvas id="carCanvas"></canvas>
+			<div class="canvas-overlay">
+				<div class="simulation-info">
+					<div class="info-item">
+						<i class="fas fa-tachometer-alt"></i>
+						<span>Velocidad: <span id="speed">0</span> km/h</span>
+					</div>
+					<div class="info-item">
+						<i class="fas fa-road"></i>
+						<span>Distancia: <span id="distance">0</span> m</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Control Panel -->
+		<aside class="control-panel">
+			<div class="panel-section">
+				<h3><i class="fas fa-brain"></i> Red Neuronal</h3>
+				<canvas id="networkCanvas"></canvas>
+				<button id="toggleNetwork" class="btn btn-secondary">
+					<i class="fas fa-eye"></i>
+					Mostrar Red
+				</button>
+			</div>
+
+			<div class="panel-section">
+				<h3><i class="fas fa-chart-line"></i> Estadísticas</h3>
+				<div class="stats-grid">
+					<div class="stat-card">
+						<div class="stat-value" id="generationCount">0</div>
+						<div class="stat-label">Generaciones</div>
+					</div>
+					<div class="stat-card">
+						<div class="stat-value" id="carCount">150</div>
+						<div class="stat-label">Autos Activos</div>
+					</div>
+					<div class="stat-card">
+						<div class="stat-value" id="bestScore">0</div>
+						<div class="stat-label">Mejor Puntuación</div>
+					</div>
+					<div class="stat-card">
+						<div class="stat-value" id="mutationRate">40%</div>
+						<div class="stat-label">Tasa Mutación</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="panel-section">
+				<h3><i class="fas fa-cogs"></i> Controles</h3>
+				<div class="controls-grid">
+					<button onclick="save()" class="btn btn-primary" title="Guardar el mejor cerebro">
+						<i class="fas fa-save"></i>
+						<span>Guardar</span>
+					</button>
+					<button onclick="discard()" class="btn btn-danger" title="Descartar progreso y reiniciar">
+						<i class="fas fa-trash"></i>
+						<span>Reiniciar</span>
+					</button>
+					<button onclick="pauseSimulation()" class="btn btn-warning" id="pauseBtn" title="Pausar/Reanudar simulación">
+						<i class="fas fa-pause"></i>
+						<span>Pausar</span>
+					</button>
+					<button onclick="exportData()" class="btn btn-info" title="Exportar datos de entrenamiento">
+						<i class="fas fa-download"></i>
+						<span>Exportar</span>
+					</button>
+				</div>
+			</div>
+
+			<div class="panel-section">
+				<h3><i class="fas fa-sliders-h"></i> Configuración</h3>
+				<div class="config-item">
+					<label for="speedSlider">Velocidad Simulación:</label>
+					<input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
+					<span id="speedValue">1x</span>
+				</div>
+				<div class="config-item">
+					<label for="carCountSlider">Número de Autos:</label>
+					<input type="range" id="carCountSlider" min="50" max="300" step="10" value="150">
+					<span id="carCountValue">150</span>
+				</div>
+				<div class="config-item">
+					<label for="laneCountSlider">Número de Carriles:</label>
+					<input type="range" id="laneCountSlider" min="2" max="6" step="1" value="3">
+					<span id="laneCountValue">3</span>
+				</div>
+				<div class="config-item">
+					<label for="trafficDensitySlider">Densidad de Tráfico:</label>
+					<input type="range" id="trafficDensitySlider" min="0.1" max="1" step="0.1" value="0.4">
+					<span id="trafficDensityValue">40%</span>
+				</div>
+				<div class="config-item">
+					<label for="roadWidthSlider">Ancho de Carretera:</label>
+					<input type="range" id="roadWidthSlider" min="0.5" max="1" step="0.05" value="0.7">
+					<span id="roadWidthValue">70%</span>
+				</div>
+				<button onclick="applyRoadSettings()" class="btn btn-secondary" style="margin-top: 1rem;">
+					<i class="fas fa-sync-alt"></i>
+					Aplicar Cambios
+				</button>
+			</div>
+
+			<div class="panel-section">
+				<h3><i class="fas fa-info-circle"></i> Información</h3>
+				<div class="info-text">
+					<p>Esta simulación utiliza algoritmos genéticos y redes neuronales para entrenar autos autónomos.</p>
+					<p><strong>Controles:</strong></p>
+					<ul>
+						<li>💾 Guardar: Almacena el mejor cerebro</li>
+						<li>🗑️ Reiniciar: Borra el progreso</li>
+						<li>⏸️ Pausar: Pausa la simulación</li>
+					</ul>
+				</div>
+			</div>
+		</aside>
+	</main>
+
+	<!-- Scripts -->
 	<script src="visualizer.js"></script>
 	<script src="network.js"></script>
 	<script src="sensor.js"></script>
