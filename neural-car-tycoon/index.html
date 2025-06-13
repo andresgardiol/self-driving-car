@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Car Tycoon</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header con información del juego -->
+        <header class="game-header">
+            <h1>🚗 Neural Car Tycoon</h1>
+            <div class="money-display">
+                💰 $<span id="money">0</span>
+            </div>
+        </header>
+
+        <!-- Área principal del juego -->
+        <main class="game-main">
+            <!-- Canvas para la simulación -->
+            <div class="simulation-area">
+                <canvas id="gameCanvas" width="600" height="400"></canvas>
+                <div class="simulation-stats">
+                    <div class="stat">
+                        <span class="stat-label">Distancia:</span>
+                        <span id="distance">0</span>m
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Velocidad:</span>
+                        <span id="speed">0</span> km/h
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Ingresos/seg:</span>
+                        $<span id="income-rate">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de upgrades -->
+            <aside class="upgrades-panel">
+                <h2>🔧 Mejoras</h2>
+                <div class="upgrades-list" id="upgrades-list">
+                    <!-- Los upgrades se generarán dinámicamente -->
+                </div>
+                
+                <div class="neural-network-display">
+                    <h3>🧠 Red Neuronal</h3>
+                    <canvas id="networkCanvas" width="300" height="200"></canvas>
+                    <div class="network-stats">
+                        <div>Neuronas: <span id="neuron-count">8</span></div>
+                        <div>Capas: <span id="layer-count">3</span></div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Controles del juego -->
+        <div class="game-controls">
+            <div class="control-group">
+                <button id="pause-btn" class="control-btn primary" onclick="togglePause()">⏸️ Pausar</button>
+                <button id="next-gen-btn" class="control-btn success" onclick="nextGeneration()">🧬 Nueva Generación</button>
+            </div>
+            <div class="control-group">
+                <button id="reset-btn" class="control-btn warning" onclick="resetCar()">🔄 Reiniciar Auto</button>
+                <button id="save-btn" class="control-btn info" onclick="saveGame()">💾 Guardar</button>
+            </div>
+            <div class="speed-control">
+                <label for="speed-slider">Velocidad: <span id="speed-value">1x</span></label>
+                <input type="range" id="speed-slider" min="0.5" max="3" step="0.1" value="1">
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts del juego -->
+    <script src="js/neural-network.js"></script>
+    <script src="js/car.js"></script>
+    <script src="js/road.js"></script>
+    <script src="js/economy.js"></script>
+    <script src="js/upgrades.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 
